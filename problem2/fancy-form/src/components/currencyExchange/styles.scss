@@ -1,0 +1,32 @@
+.items_horizontal {
+  display: flex;
+  flex-direction: horizontal;
+  justify-content: space-between;
+  background-color: #eceff3;
+  padding: 24px 24px 0 24px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.token_icon {
+  margin-right: 10px;
+  width: 20px;
+  height: 20px;
+}
+
+// antd design
+.ant-select-selection-item {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.ant-select-item-option-content {
+  display: flex;
+  align-items: center;
+}
+
+.ant-form-item-label > label.ant-form-item-required {
+  font-weight: 600;
+  font-size: 14px;
+}
