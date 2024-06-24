@@ -7,8 +7,8 @@ import {
   Flex,
   Typography,
   message,
-  InputNumber,
   Divider,
+  Input,
 } from "antd";
 import { IToken, IWallet } from "../home/Home";
 
@@ -27,6 +27,8 @@ export const CurrencyExchange: React.FC<ICurrencyExchange> = ({
 }) => {
   const [form] = Form.useForm();
   const [value, setValue] = useState(0);
+
+  const [select, setSelect] = useState("");
 
   const updateWallet = (values: any) => {
     const update = wallet.map((token) => {
@@ -63,7 +65,8 @@ export const CurrencyExchange: React.FC<ICurrencyExchange> = ({
       const values = form.getFieldsValue();
 
       setWallet(updateWallet(values));
-
+      form.resetFields();
+      setValue(0);
       message.success("Form submitted successfully");
     } catch (error) {
       console.error("Validation failed:", error);
@@ -91,36 +94,38 @@ export const CurrencyExchange: React.FC<ICurrencyExchange> = ({
     return Promise.resolve();
   };
 
-  const handleChangeFormItemForValue = (allValues: any) => {
-    if ("amount" in allValues) {
-      if ("fromToken" in allValues && "toToken" in allValues) {
-        const amount = Number(allValues.amount);
+  const handleChangeFormItemForValue = (changesValue: any, allValues: any) => {
+    if (
+      "amount" in allValues &&
+      "fromToken" in allValues &&
+      "toToken" in allValues
+    ) {
+      const amount = Number(allValues.amount);
 
-        if (isNaN(amount)) {
-          setValue(0);
-          return;
-        }
+      if (isNaN(amount)) {
+        setValue(0);
+        return;
+      }
+      console.log(allValues.fromToken);
 
-        const fromToken = tokens.find(
-          (token) => token.currency === allValues.fromToken
-        );
-        const toToken = tokens.find(
-          (token) => token.currency === allValues.toToken
-        );
+      const fromToken = tokens.find(
+        (token) => token.currency === allValues.fromToken
+      );
+      const toToken = tokens.find(
+        (token) => token.currency === allValues.toToken
+      );
 
-        const fromTokenPrice = fromToken ? fromToken.price : 1;
-        const toTokenPrice = toToken ? toToken.price : 1;
+      const fromTokenPrice = fromToken ? fromToken.price : 1;
+      const toTokenPrice = toToken ? toToken.price : 1;
 
-        const finalValue = (amount * fromTokenPrice) / toTokenPrice;
+      const finalValue = (amount * fromTokenPrice) / toTokenPrice;
 
-        if (isNaN(finalValue)) {
-          setValue(0);
-        } else {
-          setValue(Number(finalValue.toFixed(4)));
-        }
+      if (isNaN(finalValue)) {
+        setValue(0);
+      } else {
+        setValue(Number(finalValue.toFixed(4)));
       }
     }
-    throw new Error("Amount is undefined");
   };
 
   return (
@@ -145,11 +150,11 @@ export const CurrencyExchange: React.FC<ICurrencyExchange> = ({
         onFinish={handleSubmit}
         requiredMark={"optional"}
         title="Currency Swap"
-        onValuesChange={handleChangeFormItemForValue}
         initialValues={{
           fromToken: "ETH",
           toToken: "USD",
         }}
+        onValuesChange={handleChangeFormItemForValue}
       >
         <Typography.Title level={5} style={{ margin: "10px" }}>
           From
@@ -163,9 +168,15 @@ export const CurrencyExchange: React.FC<ICurrencyExchange> = ({
               {
                 validator: validateAmount,
               },
+              {
+                validator: (_, value) =>
+                  value > 0
+                    ? Promise.resolve()
+                    : Promise.reject("Amount must be greater than zero"),
+              },
             ]}
           >
-            <InputNumber
+            <Input
               min={1}
               size="large"
               type="number"
@@ -184,12 +195,15 @@ export const CurrencyExchange: React.FC<ICurrencyExchange> = ({
               placeholder="Select from token"
               onChange={() => form.validateFields(["amount"])}
             >
-              {tokens.map((token) => (
-                <Option key={token.currency} value={token.currency}>
-                  <img src={token.icon} alt="icon" className="token_icon" />
-                  {token.currency}
-                </Option>
-              ))}
+              {tokens.map((token) => {
+                console.log(token.currency);
+                return (
+                  <Option key={token.currency} value={token.currency}>
+                    <img src={token.icon} alt="icon" className="token_icon" />
+                    {token.currency}
+                  </Option>
+                );
+              })}
             </Select>
           </Form.Item>
         </div>
@@ -210,7 +224,7 @@ export const CurrencyExchange: React.FC<ICurrencyExchange> = ({
               {value}
             </Typography>
           </div>
-          
+
           <Form.Item
             name="toToken"
             rules={[{ required: true, message: "Token is required" }]}

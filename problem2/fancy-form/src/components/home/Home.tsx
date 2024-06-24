@@ -82,6 +82,7 @@ export const Home = () => {
         console.error("Error fetching data:", error);
       });
   }, []);
+  console.log("re-render");
 
   return (
     <div className="gradientBackground">
